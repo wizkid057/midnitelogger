@@ -315,7 +315,7 @@ int main(int argc, char **argv) {
 
 	if (print_header)
 		if (!human_output)
-			printf("local_id,host,battery_volts,pv_volts,battery_volts_raw,pv_volts_raw,battery_amps,pv_amps,pv_voc,watts,kWh_today,Ah_today,ext_temp,int_fet_temp,int_pcb_temp,life_kWh,life_Ah,float_seconds_today,combochargestate\n");
+			printf("local_id,host,unixtime,battery_volts,pv_volts,battery_volts_raw,pv_volts_raw,battery_amps,pv_amps,pv_voc,watts,kWh_today,Ah_today,ext_temp,int_fet_temp,int_pcb_temp,life_kWh,life_Ah,float_seconds_today,combochargestate\n");
 
 
 	if (fork_to_bg) {
@@ -360,8 +360,10 @@ void print_local_status() {
 
 	float battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps, pv_amps, pv_voc, kWh_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh;
 	unsigned int watts, Ah_today, life_Ah, float_seconds_today, combochargestate;
+	unsigned int ctime;
 	int i,j=0;
 	char tchar = 'C';
+	ctime = time(NULL);
 	for(i=0;i<cc_count;i++) {
 		if (cclist[i].alive) {
 			j++;
@@ -383,7 +385,7 @@ void print_local_status() {
 			float_seconds_today = cclist[i].modbus_register[37];
 			combochargestate = cclist[i].modbus_register[19];
 			if (human_output) {
-				printf("%s (%d): \n",cclist[i].ip,cclist[i].cid);
+				printf("%s (%d) @ %u: \n",cclist[i].ip,cclist[i].cid,ctime);
 				printf(" --- Battery:   %.1f V @ %.1f A\n",battery_volts,battery_amps);
 				printf(" --- PV:        %.1f V @ %.1f A (VoC: %.1f)\n",pv_volts,pv_amps,pv_voc);
 				printf(" --- PV Power:  %u W (%.1f kWh / %u Ah today)\n",watts,kWh_today,Ah_today);
@@ -395,7 +397,7 @@ void print_local_status() {
 				}
 				printf(" --- Temps:     %.1f %c (PCB) / %.1f %c (FET) / %.1f %c (EXT)\n\n",int_pcb_temp,tchar,int_fet_temp,tchar,ext_temp,tchar);
 			} else {
-				printf("%d,'%s',%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%u,%u,%u\n",cclist[i].cid,cclist[i].ip,battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps, pv_amps, pv_voc, watts, kWh_today, Ah_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh, life_Ah, float_seconds_today, combochargestate);
+				printf("%d,'%s',%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%u,%u,%u\n",cclist[i].cid,cclist[i].ip,ctime,battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps, pv_amps, pv_voc, watts, kWh_today, Ah_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh, life_Ah, float_seconds_today, combochargestate);
 			}
 		}
 	}
