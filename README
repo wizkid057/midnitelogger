@@ -1,0 +1,102 @@
+midnitelogger v0.3
+
+I wrote this program to help me log data from multiple Midnite
+Classic charge controllers over their ethernet connections
+using the built in modbus TCP port.
+
+Some notes:
+I've only tested this on the Classic 200.  I've not tried any
+other variations (because I don't own them), including the "Lite"
+versions.
+
+I've tested this with 17 Classics @ 5 second polling intervals.
+
+The software tries to be smart about connectivity and ignores
+Classics that it can't communicate with while continuing to
+poll data from the others.
+
+I chose postgres for databasing because it seems to work well
+with huge numeric data sets such as this which would permit
+a reasonable machine to log at ~5 second intervals for years
+without much effort.
+
+A schema output from my database is included.
+
+This program does not write to any registers.  It only reads a
+couple small blocks of them to get all of the data that is
+meaningful for logging.
+
+Hopefully someone else finds this useful.
+
+I am not affiliated with Midnite Solar.
+
+I've only tested and compiled this on Debian Wheezy x64, but I
+don't see why it wouldn't work elsewhere.
+
+Pull requests welcome. (Please use tabs for indentation!)
+
+It's not my prettiest code, and likely has bugs, but it seems
+to work for me in testing.
+
+
+----
+
+
+midnitelogger v0.3 - (C) 2015 Jason Hughes (wk_fs@skie.net)
+Usage: ./midnitelogger [-dboL] [--dbname=DB_NAME] [--dbuser=X] [--dbpass=X|--dbpassfile=X] [--dbhost=X] [--C=host [--C=host]...]
+
+   -d               debugging output (silent otherwise)
+   -b               fork into background after successful launch
+   -o               output read data to console (default is csv output)
+   -T               print csv header as first output line (for use with -o)
+   -H               human readable local output (for use with -o, not compatible with -H)
+   -N               do not load charge controller list from database (requires -C)
+   -R               do not write data to database
+   -L               local usage only, no database. (same as -R -L)
+                     requires at least one ip/port argument (-C)
+                     goes well with -o.  db* arguments ignored
+   -C host          IP or hostname of Midnite Classic (for use with -L), can do multiple
+   -i seconds       polling interval in seconds (default: 5)
+   -O               one shot (exit after first data output)
+   -P port          port to use for modbus TCP connection (default: 502)
+                     ^ Applies to all connections (local or DB fetched)
+   -F               temperatures in fahrenheit (only works with -H, db always in C)
+   --dbname=X       postgres database name (-n)
+   --dbuser=X       postgres username (-u)
+   --dbhost=X       postgres database host/ip (default: localhost) (-h)
+   --dbpass=X       postgres password for dbuser (-p)
+   --dbpassfile=X   file containing password for dbuser (-f)
+
+The program will attempt to connect to all hosts specified on the command
+line or in the database.  If not using -O it will periodially attempt to
+reconnect to specified hosts it doesn't have a working connection to.
+
+The program ignores valid hostnames/ips that it can not connect to.
+
+* THE AUTHOR OF THIS SOFTWARE IS NOT AFFILIATED WITH MIDNITE SOLAR *
+* USE OF THIS SOFTWARE IS AT YOUR OWN RISK.  THE AUTHOR ASSUMES NO *
+* RESPONSIBILITY FOR ANYTHING THAT OCCURS THAT IS UNDESIRED.       *
+
+/----------------------------------------------------------------------\
+| This program is free software: you can redistribute it and/or modify |
+| it under the terms of the GNU General Public License as published by |
+| the Free Software Foundation, either version 3 of the License, or    |
+| (at your option) any later version.                                  |
+|                                                                      |
+| This program is distributed in the hope that it will be useful,      |
+| but WITHOUT ANY WARRANTY; without even the implied warranty of       |
+| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        |
+| GNU General Public License for more details.                         |
+|                                                                      |
+| You should have received a copy of the GNU General Public License    |
+| along with this program.  If not, see www.gnu.org/licenses/          |
+\----------------------------------------------------------------------/
+
+
+---
+
+Sample charge_controler_list insert:
+
+   insert into charge_controller_list (name, smallname, ip, mac, serial, deviceid) VALUES ('Midnite Classic 200 A', 'Roof', '192.168.1.101', '60:1D:0F:00:00:00', 12345, 'FFFF FFFF');
+
+Currently most of the fields are not used by this software (and are retrievable using the IP) so, only for some future front end usage.

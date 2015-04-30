@@ -1,0 +1,7 @@
+obj
+obj/
+.gitold
+.gitold/
+*.o
+dbpass.txt
+midnitelogger
