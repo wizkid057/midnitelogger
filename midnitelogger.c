@@ -393,7 +393,7 @@ void print_local_status() {
 				printf(" --- Battery:   %.1f V @ %.1f A\n",battery_volts,battery_amps);
 				printf(" --- PV:        %.1f V @ %.1f A (VoC: %.1f)\n",pv_volts,pv_amps,pv_voc);
 				printf(" --- PV Power:  %u W (%.1f kWh / %u Ah today)\n",watts,kWh_today,Ah_today);
-				printf(" --- WbJr: %u SOC / %u Ah Remain / %u Ah Total\n",wbj_soc,wbjr_remaining_ah,wbjr_total_ah);
+				printf(" --- WbJr: %u SOC / %u Ah Remain / %u Ah Total\n",wbjr_soc,wbjr_remaining_ah,wbjr_total_ah);
 				if (temps_F) {
 					int_pcb_temp = (int_pcb_temp * (9.0f/5.0f)) + 32;
 					int_fet_temp = (int_fet_temp * (9.0f/5.0f)) + 32;
