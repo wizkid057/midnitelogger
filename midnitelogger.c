@@ -650,6 +650,7 @@ void gather_data_all() {
 
 	get_from_all(10, 30);
 	get_from_all(170, 10);
+	get_from_all(259, 22);
 
 	ctime = time(NULL);
 	for(i=0;i<cc_count;i++) {
