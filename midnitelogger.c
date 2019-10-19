@@ -360,7 +360,7 @@ void print_local_status() {
 
 	float battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps, pv_amps, pv_voc, kWh_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh;
 	unsigned int watts, Ah_today, life_Ah, float_seconds_today, combochargestate;
-	unsigned int ctime;
+	unsigned int ctime, wbjr_total_ah;
 	int i,j=0;
 	char tchar = 'C';
 	ctime = time(NULL);
