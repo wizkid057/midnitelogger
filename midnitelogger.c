@@ -384,8 +384,8 @@ void print_local_status() {
 			life_Ah = (unsigned long)cclist[i].modbus_register[27] + ((unsigned long)cclist[i].modbus_register[28]<<16);
 			float_seconds_today = cclist[i].modbus_register[37];
 			combochargestate = cclist[i].modbus_register[19];
-			wbjr_remaining_ah = cclist[i].modbus_register[275];
-			wbjr_total_ah = cclist[i].modbus_register[279];
+			wbjr_remaining_ah = cclist[i].modbus_register[276];
+			wbjr_total_ah = cclist[i].modbus_register[280];
 
 			if (human_output) {
 				printf("%s (%d) @ %u: \n",cclist[i].ip,cclist[i].cid,ctime);
