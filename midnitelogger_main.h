@@ -1,6 +1,6 @@
 /*
     midnitelogger - A data logging software for use with Midnite Solar's
-                    "Classic" charge controllers over TCP 
+                    "Classic" charge controllers over TCP
 
     Copyright (C) 2015 Jason Hughes (wk_fs@skie.net)
 
@@ -34,8 +34,8 @@ typedef struct {
 	struct sockaddr_in sa;
 
 	// modbus registers - might as well keep these
-	// we'll use this for 4100 to 4355
-	unsigned short modbus_register[256];
+	// we'll use this for 4100 to 4382 (extended for WbJr)
+	unsigned short modbus_register[283];
 
 	// last successful read
 	unsigned int last_success;

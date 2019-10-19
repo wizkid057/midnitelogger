@@ -384,11 +384,14 @@ void print_local_status() {
 			life_Ah = (unsigned long)cclist[i].modbus_register[27] + ((unsigned long)cclist[i].modbus_register[28]<<16);
 			float_seconds_today = cclist[i].modbus_register[37];
 			combochargestate = cclist[i].modbus_register[19];
+			wbjr_total_ah = cclist[i].modbus_register[279];
+
 			if (human_output) {
 				printf("%s (%d) @ %u: \n",cclist[i].ip,cclist[i].cid,ctime);
 				printf(" --- Battery:   %.1f V @ %.1f A\n",battery_volts,battery_amps);
 				printf(" --- PV:        %.1f V @ %.1f A (VoC: %.1f)\n",pv_volts,pv_amps,pv_voc);
 				printf(" --- PV Power:  %u W (%.1f kWh / %u Ah today)\n",watts,kWh_today,Ah_today);
+				printf(" --- WbJr Total Ahr: %u Ah\n",wbjr_total_ah);
 				if (temps_F) {
 					int_pcb_temp = (int_pcb_temp * (9.0f/5.0f)) + 32;
 					int_fet_temp = (int_fet_temp * (9.0f/5.0f)) + 32;
@@ -596,7 +599,7 @@ void wait_for_data_ready() {
 		for(i=0;i<cc_count;i++) {
 			if (cclist[i].alive) {
 				FD_SET(cclist[i].s, &fset);
-				if (cclist[i].s > max_sd) 
+				if (cclist[i].s > max_sd)
 					max_sd = cclist[i].s;
 				c++;
 			}
@@ -805,4 +808,3 @@ PGresult* psql_query(PGconn *lconn, char *str) {
 	return lres;
 
 }
-
