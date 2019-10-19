@@ -358,7 +358,9 @@ int main(int argc, char **argv) {
 
 void print_local_status() {
 
-	float battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps, pv_amps, pv_voc, kWh_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh;
+	float battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps;
+	float pv_amps, pv_voc, kWh_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh;
+	float wbjr_batt_current;
 	unsigned int watts, Ah_today, life_Ah, float_seconds_today, combochargestate;
 	unsigned int ctime, wbjr_soc, wbjr_remaining_ah, wbjr_total_ah;
 	int i,j=0;
@@ -384,6 +386,7 @@ void print_local_status() {
 			life_Ah = (unsigned long)cclist[i].modbus_register[27] + ((unsigned long)cclist[i].modbus_register[28]<<16);
 			float_seconds_today = cclist[i].modbus_register[37];
 			combochargestate = cclist[i].modbus_register[19];
+			wbjr_batt_current	= (float)cclist[i].modbus_register[270]/10.0f;
 			wbjr_soc = cclist[i].modbus_register[272];
 			wbjr_remaining_ah = cclist[i].modbus_register[276];
 			wbjr_total_ah = cclist[i].modbus_register[280];
@@ -393,7 +396,8 @@ void print_local_status() {
 				printf(" --- Battery:   %.1f V @ %.1f A\n",battery_volts,battery_amps);
 				printf(" --- PV:        %.1f V @ %.1f A (VoC: %.1f)\n",pv_volts,pv_amps,pv_voc);
 				printf(" --- PV Power:  %u W (%.1f kWh / %u Ah today)\n",watts,kWh_today,Ah_today);
-				printf(" --- WbJr: %u SOC / %u Ah Remain / %u Ah Total\n",wbjr_soc,wbjr_remaining_ah,wbjr_total_ah);
+				printf(" --- WbJr: 			%u SOC / %u Ah Remain / %u Ah Total\n",wbjr_soc,wbjr_remaining_ah,wbjr_total_ah);
+				printf(" --- WbJr: 			%.1f A Current\n",wbjr_batt_current);
 				if (temps_F) {
 					int_pcb_temp = (int_pcb_temp * (9.0f/5.0f)) + 32;
 					int_fet_temp = (int_fet_temp * (9.0f/5.0f)) + 32;
