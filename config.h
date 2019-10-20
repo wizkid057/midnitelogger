@@ -1,6 +1,6 @@
 /*
     midnitelogger - A data logging software for use with Midnite Solar's
-                    "Classic" charge controllers over TCP 
+                    "Classic" charge controllers over TCP
 
     Copyright (C) 2015 Jason Hughes (wk_fs@skie.net)
 
@@ -22,7 +22,7 @@
 #define ML_CONFIG_H
 
 
-#define VERSION "0.3"
+#define VERSION "0.4"
 
 // memory allocated for this+18 for each charge controller
 #define CC_MAX_HOST_LEN 256
