@@ -9,14 +9,14 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner:
 --
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner:
 --
 
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
@@ -29,7 +29,7 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: charge_controller_data; Type: TABLE; Schema: public; Owner: solar; Tablespace: 
+-- Name: charge_controller_data; Type: TABLE; Schema: public; Owner: solar; Tablespace:
 --
 
 CREATE TABLE charge_controller_data (
@@ -52,9 +52,12 @@ CREATE TABLE charge_controller_data (
     life_kwh real,
     life_ah integer,
     float_seconds_today integer,
-    combochargestate integer
+    combochargestate integer,
+    wbjr_soc integer,
+    wbjr_remaining_ah integer
 );
 
+CREATE INDEX ON charge_controller_data(ts);
 
 ALTER TABLE public.charge_controller_data OWNER TO solar;
 
@@ -80,7 +83,7 @@ ALTER SEQUENCE charge_controller_data_id_seq OWNED BY charge_controller_data.id;
 
 
 --
--- Name: charge_controller_list; Type: TABLE; Schema: public; Owner: solar; Tablespace: 
+-- Name: charge_controller_list; Type: TABLE; Schema: public; Owner: solar; Tablespace:
 --
 
 CREATE TABLE charge_controller_list (
@@ -132,7 +135,7 @@ ALTER TABLE ONLY charge_controller_list ALTER COLUMN cid SET DEFAULT nextval('ch
 
 
 --
--- Name: charge_controller_data_pkey; Type: CONSTRAINT; Schema: public; Owner: solar; Tablespace: 
+-- Name: charge_controller_data_pkey; Type: CONSTRAINT; Schema: public; Owner: solar; Tablespace:
 --
 
 ALTER TABLE ONLY charge_controller_data
@@ -140,7 +143,7 @@ ALTER TABLE ONLY charge_controller_data
 
 
 --
--- Name: charge_controller_list_pkey; Type: CONSTRAINT; Schema: public; Owner: solar; Tablespace: 
+-- Name: charge_controller_list_pkey; Type: CONSTRAINT; Schema: public; Owner: solar; Tablespace:
 --
 
 ALTER TABLE ONLY charge_controller_list
@@ -160,4 +163,3 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 --
 -- PostgreSQL database dump complete
 --
-

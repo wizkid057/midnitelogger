@@ -315,7 +315,7 @@ int main(int argc, char **argv) {
 
 	if (print_header)
 		if (!human_output)
-			printf("local_id,host,unixtime,battery_volts,pv_volts,battery_volts_raw,pv_volts_raw,battery_amps,pv_amps,pv_voc,watts,kWh_today,Ah_today,ext_temp,int_fet_temp,int_pcb_temp,life_kWh,life_Ah,float_seconds_today,combochargestate\n");
+			printf("local_id,host,unixtime,battery_volts,pv_volts,battery_volts_raw,pv_volts_raw,battery_amps,pv_amps,pv_voc,watts,kWh_today,Ah_today,ext_temp,int_fet_temp,int_pcb_temp,life_kWh,life_Ah,float_seconds_today,combochargestate,wbjr_soc,wbjr_remaining_ah\n");
 
 
 	if (fork_to_bg) {
@@ -358,9 +358,11 @@ int main(int argc, char **argv) {
 
 void print_local_status() {
 
-	float battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps, pv_amps, pv_voc, kWh_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh;
+	float battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps;
+	float pv_amps, pv_voc, kWh_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh;
+	float wbjr_batt_current;
 	unsigned int watts, Ah_today, life_Ah, float_seconds_today, combochargestate;
-	unsigned int ctime;
+	unsigned int ctime, wbjr_soc, wbjr_remaining_ah, wbjr_total_ah;
 	int i,j=0;
 	char tchar = 'C';
 	ctime = time(NULL);
@@ -384,11 +386,18 @@ void print_local_status() {
 			life_Ah = (unsigned long)cclist[i].modbus_register[27] + ((unsigned long)cclist[i].modbus_register[28]<<16);
 			float_seconds_today = cclist[i].modbus_register[37];
 			combochargestate = cclist[i].modbus_register[19];
+			wbjr_batt_current	= (float)cclist[i].modbus_register[270]/10.0f;
+			wbjr_soc = cclist[i].modbus_register[272];
+			wbjr_remaining_ah = cclist[i].modbus_register[276];
+			wbjr_total_ah = cclist[i].modbus_register[280];
+
 			if (human_output) {
 				printf("%s (%d) @ %u: \n",cclist[i].ip,cclist[i].cid,ctime);
 				printf(" --- Battery:   %.1f V @ %.1f A\n",battery_volts,battery_amps);
 				printf(" --- PV:        %.1f V @ %.1f A (VoC: %.1f)\n",pv_volts,pv_amps,pv_voc);
 				printf(" --- PV Power:  %u W (%.1f kWh / %u Ah today)\n",watts,kWh_today,Ah_today);
+				printf(" --- WbJr: 			%u SOC / %u Ah Remain / %u Ah Total\n",wbjr_soc,wbjr_remaining_ah,wbjr_total_ah);
+				printf(" --- WbJr: 			%.1f A Current\n",wbjr_batt_current);
 				if (temps_F) {
 					int_pcb_temp = (int_pcb_temp * (9.0f/5.0f)) + 32;
 					int_fet_temp = (int_fet_temp * (9.0f/5.0f)) + 32;
@@ -397,7 +406,7 @@ void print_local_status() {
 				}
 				printf(" --- Temps:     %.1f %c (PCB) / %.1f %c (FET) / %.1f %c (EXT)\n\n",int_pcb_temp,tchar,int_fet_temp,tchar,ext_temp,tchar);
 			} else {
-				printf("%d,'%s',%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%u,%u,%u\n",cclist[i].cid,cclist[i].ip,ctime,battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps, pv_amps, pv_voc, watts, kWh_today, Ah_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh, life_Ah, float_seconds_today, combochargestate);
+				printf("%d,'%s',%u,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%u,%.1f,%u,%.1f,%.1f,%.1f,%.1f,%u,%u,%u,%u,%u\n",cclist[i].cid,cclist[i].ip,ctime,battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps, pv_amps, pv_voc, watts, kWh_today, Ah_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh, life_Ah, float_seconds_today, combochargestate, wbjr_soc, wbjr_remaining_ah);
 			}
 		}
 	}
@@ -413,15 +422,18 @@ void write_to_db(PGconn *conn) {
 
 	int i,f=0;
 
-	float battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps, pv_amps, pv_voc, kWh_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh;
+	float battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps;
+	float pv_amps, pv_voc, kWh_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh;
 	unsigned int watts, Ah_today, life_Ah, float_seconds_today, combochargestate;
+	unsigned int wbjr_soc, wbjr_remaining_ah;
+
 	PGresult *res;
 
 
 	char sql[50000];
 	char sql2[5000];
 
-	strcpy(sql,"insert into charge_controller_data (cid, battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps, pv_amps, pv_voc, watts, kWh_today, Ah_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh, life_Ah, float_seconds_today, combochargestate) VALUES ");
+	strcpy(sql,"insert into charge_controller_data (cid, battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps, pv_amps, pv_voc, watts, kWh_today, Ah_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh, life_Ah, float_seconds_today, combochargestate, wbjr_soc, wbjr_remaining_ah) VALUES ");
 
 	for(i=0;i<cc_count;i++) {
 		if (cclist[i].alive) {
@@ -442,14 +454,15 @@ void write_to_db(PGconn *conn) {
 			life_Ah = (unsigned long)cclist[i].modbus_register[27] + ((unsigned long)cclist[i].modbus_register[28]<<16);
 			float_seconds_today = cclist[i].modbus_register[37];
 			combochargestate = cclist[i].modbus_register[19];
-
+			wbjr_soc = cclist[i].modbus_register[272];
+			wbjr_remaining_ah = cclist[i].modbus_register[276];
 
 			if (f) {
 				strcat(sql,", ");
 			}
 			f++;
 
-			sprintf(sql2,"(%d, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %u, %.1f, %u, %.1f, %.1f, %.1f, %.1f, %u, %u, %u)",cclist[i].cid, battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps, pv_amps, pv_voc, watts, kWh_today, Ah_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh, life_Ah, float_seconds_today, combochargestate);
+			sprintf(sql2,"(%d, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %.1f, %u, %.1f, %u, %.1f, %.1f, %.1f, %.1f, %u, %u, %u, %u, %u)",cclist[i].cid, battery_volts, pv_volts, battery_volts_raw, pv_volts_raw, battery_amps, pv_amps, pv_voc, watts, kWh_today, Ah_today, ext_temp, int_fet_temp, int_pcb_temp, life_kWh, life_Ah, float_seconds_today, combochargestate, wbjr_soc, wbjr_remaining_ah);
 			strcat(sql,sql2);
 
 		}
@@ -596,7 +609,7 @@ void wait_for_data_ready() {
 		for(i=0;i<cc_count;i++) {
 			if (cclist[i].alive) {
 				FD_SET(cclist[i].s, &fset);
-				if (cclist[i].s > max_sd) 
+				if (cclist[i].s > max_sd)
 					max_sd = cclist[i].s;
 				c++;
 			}
@@ -647,6 +660,7 @@ void gather_data_all() {
 
 	get_from_all(10, 30);
 	get_from_all(170, 10);
+	get_from_all(259, 22);
 
 	ctime = time(NULL);
 	for(i=0;i<cc_count;i++) {
@@ -805,4 +819,3 @@ PGresult* psql_query(PGconn *lconn, char *str) {
 	return lres;
 
 }
-

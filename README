@@ -1,4 +1,4 @@
-midnitelogger v0.3
+midnitelogger v0.4
 
 I wrote this program to help me log data from multiple Midnite
 Classic charge controllers over their ethernet connections
@@ -38,11 +38,15 @@ Pull requests welcome. (Please use tabs for indentation!)
 It's not my prettiest code, and likely has bugs, but it seems
 to work for me in testing.
 
+----
+
+RoLoTo - Added some Whizbang JR support.
+Warning: Does NOT check if WbJr is installed.
 
 ----
 
 
-midnitelogger v0.3 - (C) 2015 Jason Hughes (wk_fs@skie.net)
+midnitelogger v0.4 - (C) 2015 Jason Hughes (wk_fs@skie.net)
 Usage: ./midnitelogger [-dboL] [--dbname=DB_NAME] [--dbuser=X] [--dbpass=X|--dbpassfile=X] [--dbhost=X] [--C=host [--C=host]...]
 
    -d               debugging output (silent otherwise)
